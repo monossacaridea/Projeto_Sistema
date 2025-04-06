@@ -2,7 +2,7 @@ package Agencia;
 import java.util.*;
 import javax.swing.*;
 
-// Classe abstrata Cliente
+// Cliente abstrato
 abstract class Cliente {
     protected String nome;
     protected String telefone;
@@ -15,17 +15,18 @@ abstract class Cliente {
     }
 
     public abstract String getIdentificacao();
+    public String getResumo() {
+        return nome + " (" + getIdentificacao() + ")";
+    }
 }
 
 // Cliente Nacional
 class ClienteNacional extends Cliente {
     private String cpf;
-
     public ClienteNacional(String nome, String telefone, String email, String cpf) {
         super(nome, telefone, email);
         this.cpf = cpf;
     }
-
     @Override
     public String getIdentificacao() {
         return cpf;
@@ -35,19 +36,17 @@ class ClienteNacional extends Cliente {
 // Cliente Estrangeiro
 class ClienteEstrangeiro extends Cliente {
     private String passaporte;
-
     public ClienteEstrangeiro(String nome, String telefone, String email, String passaporte) {
         super(nome, telefone, email);
         this.passaporte = passaporte;
     }
-
     @Override
     public String getIdentificacao() {
         return passaporte;
     }
 }
 
-// Classe abstrata PacoteViagem
+// Pacote abstrato
 abstract class PacoteViagem {
     protected String nome;
     protected String destino;
@@ -65,16 +64,31 @@ abstract class PacoteViagem {
         this.preco = preco;
         this.tipo = tipo;
     }
+
+    public String getResumo() {
+        return nome + " - " + tipo + " (" + destino + ", " + duracao + " dias, R$" + preco + ")";
+    }
 }
 
-// Pacote de Aventura
 class PacoteAventura extends PacoteViagem {
     public PacoteAventura(String nome, String destino, int duracao, double preco) {
         super(nome, destino, duracao, preco, "Aventura");
     }
 }
 
-// Classe de Serviços Adicionais
+class PacoteLuxo extends PacoteViagem {
+    public PacoteLuxo(String nome, String destino, int duracao, double preco) {
+        super(nome, destino, duracao, preco, "Luxo");
+    }
+}
+
+class PacoteCultural extends PacoteViagem {
+    public PacoteCultural(String nome, String destino, int duracao, double preco) {
+        super(nome, destino, duracao, preco, "Cultural");
+    }
+}
+
+// Serviço adicional
 class ServicoAdicional {
     String descricao;
     double preco;
@@ -83,18 +97,20 @@ class ServicoAdicional {
         this.descricao = descricao;
         this.preco = preco;
     }
+
+    public String getResumo() {
+        return descricao + " (R$" + preco + ")";
+    }
 }
 
-// Classe Pedido para relacionar Cliente, Pacotes e Serviços
+// Pedido
 class Pedido {
     private Cliente cliente;
-    private List<PacoteViagem> pacotes;
-    private List<ServicoAdicional> servicos;
+    private List<PacoteViagem> pacotes = new ArrayList<>();
+    private List<ServicoAdicional> servicos = new ArrayList<>();
 
     public Pedido(Cliente cliente) {
         this.cliente = cliente;
-        this.pacotes = new ArrayList<>();
-        this.servicos = new ArrayList<>();
     }
 
     public void adicionarPacote(PacoteViagem pacote) {
@@ -105,20 +121,26 @@ class Pedido {
         servicos.add(servico);
     }
 
-    public List<PacoteViagem> getPacotes() {
-        return pacotes;
-    }
-
-    public List<ServicoAdicional> getServicos() {
-        return servicos;
+    public String getResumo() {
+        StringBuilder sb = new StringBuilder("Cliente: " + cliente.getResumo() + "\nPacotes:\n");
+        for (PacoteViagem p : pacotes) sb.append(" - ").append(p.getResumo()).append("\n");
+        if (servicos.size() > 0) {
+            sb.append("Serviços adicionais:\n");
+            for (ServicoAdicional s : servicos) sb.append(" - ").append(s.getResumo()).append("\n");
+        }
+        return sb.toString();
     }
 
     public Cliente getCliente() {
         return cliente;
     }
+
+    public List<PacoteViagem> getPacotes() {
+        return pacotes;
+    }
 }
 
-// Classe principal com interface gráfica
+// Classe principal
 public class AgenciaViagens {
     public static void main(String[] args) {
         List<Cliente> clientes = new ArrayList<>();
@@ -127,48 +149,56 @@ public class AgenciaViagens {
         List<Pedido> pedidos = new ArrayList<>();
 
         while (true) {
-            String[] opcoes = {"Cadastrar Cliente", "Cadastrar Pacote", "Cadastrar Serviço", "Criar Pedido", "Sair"};
+            String[] opcoes = {
+                "Cadastrar Cliente", "Cadastrar Pacote", "Cadastrar Serviço",
+                "Criar Pedido", "Visualizar Clientes", "Visualizar Pacotes",
+                "Visualizar Pedidos", "Excluir Cliente", "Excluir Pacote", "Sair"
+            };
             int opcao = JOptionPane.showOptionDialog(null, "Escolha uma opção:", "Agência de Viagens",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opcoes, opcoes[0]);
 
-            if (opcao == 0) { // Cadastrar Cliente
+            if (opcao == 0) {
                 String nome = JOptionPane.showInputDialog("Nome:");
                 String tel = JOptionPane.showInputDialog("Telefone:");
                 String email = JOptionPane.showInputDialog("Email:");
-
                 String[] tiposCliente = {"Nacional", "Estrangeiro"};
-                int tipoCliente = JOptionPane.showOptionDialog(null, "Selecione o tipo de cliente:", "Tipo de Cliente",
+                int tipoCliente = JOptionPane.showOptionDialog(null, "Tipo de cliente:", "Cliente",
                         JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, tiposCliente, tiposCliente[0]);
-
-                if (tipoCliente == 0) { // Nacional
+                if (tipoCliente == 0) {
                     String cpf = JOptionPane.showInputDialog("CPF:");
                     clientes.add(new ClienteNacional(nome, tel, email, cpf));
-                } else if (tipoCliente == 1) { // Estrangeiro
+                } else {
                     String pass = JOptionPane.showInputDialog("Passaporte:");
                     clientes.add(new ClienteEstrangeiro(nome, tel, email, pass));
                 }
-            } else if (opcao == 1) { // Cadastrar Pacote
+
+            } else if (opcao == 1) {
                 String nomePacote = JOptionPane.showInputDialog("Nome do Pacote:");
                 String destino = JOptionPane.showInputDialog("Destino:");
                 int duracao = Integer.parseInt(JOptionPane.showInputDialog("Duração (dias):"));
                 double preco = Double.parseDouble(JOptionPane.showInputDialog("Preço:"));
-
-                pacotes.add(new PacoteAventura(nomePacote, destino, duracao, preco));
-            } else if (opcao == 2) { // Cadastrar Serviço
-                String descricao = JOptionPane.showInputDialog("Descrição do Serviço:");
-                double preco = Double.parseDouble(JOptionPane.showInputDialog("Preço:"));
-
-                servicos.add(new ServicoAdicional(descricao, preco));
-            } else if (opcao == 3) { // Criar Pedido
-                if (clientes.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.", "Erro!", JOptionPane.ERROR_MESSAGE);
-                    continue;
+                String[] tiposPacote = {"Aventura", "Luxo", "Cultural"};
+                int tipo = JOptionPane.showOptionDialog(null, "Tipo de Pacote:", "Pacote",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, tiposPacote, tiposPacote[0]);
+                switch (tipo) {
+                    case 0 -> pacotes.add(new PacoteAventura(nomePacote, destino, duracao, preco));
+                    case 1 -> pacotes.add(new PacoteLuxo(nomePacote, destino, duracao, preco));
+                    case 2 -> pacotes.add(new PacoteCultural(nomePacote, destino, duracao, preco));
                 }
 
+            } else if (opcao == 2) {
+                String descricao = JOptionPane.showInputDialog("Descrição do Serviço:");
+                double preco = Double.parseDouble(JOptionPane.showInputDialog("Preço:"));
+                servicos.add(new ServicoAdicional(descricao, preco));
+
+            } else if (opcao == 3) {
+                if (clientes.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.");
+                    continue;
+                }
                 String[] nomesClientes = clientes.stream().map(c -> c.nome).toArray(String[]::new);
                 int idxCliente = JOptionPane.showOptionDialog(null, "Escolha o cliente:", "Clientes",
                         JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, nomesClientes, nomesClientes[0]);
-
                 Pedido pedido = new Pedido(clientes.get(idxCliente));
 
                 while (true) {
@@ -190,8 +220,66 @@ public class AgenciaViagens {
                 }
 
                 pedidos.add(pedido);
-                JOptionPane.showMessageDialog(null, "Pedido criado com sucesso!");
-            } else if (opcao == 4 || opcao == JOptionPane.CLOSED_OPTION) {
+                JOptionPane.showMessageDialog(null, "Pedido criado com sucesso!\n\n" + pedido.getResumo());
+
+            } else if (opcao == 4) {
+                if (clientes.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.");
+                } else {
+                    StringBuilder sb = new StringBuilder();
+                    for (Cliente c : clientes) sb.append("- ").append(c.getResumo()).append("\n");
+                    JOptionPane.showMessageDialog(null, sb.toString(), "Clientes", JOptionPane.INFORMATION_MESSAGE);
+                }
+
+            } else if (opcao == 5) {
+                if (pacotes.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Nenhum pacote cadastrado.");
+                } else {
+                    StringBuilder sb = new StringBuilder();
+                    for (PacoteViagem p : pacotes) sb.append("- ").append(p.getResumo()).append("\n");
+                    JOptionPane.showMessageDialog(null, sb.toString(), "Pacotes", JOptionPane.INFORMATION_MESSAGE);
+                }
+
+            } else if (opcao == 6) {
+                if (pedidos.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Nenhum pedido criado.");
+                } else {
+                    StringBuilder sb = new StringBuilder();
+                    int count = 1;
+                    for (Pedido p : pedidos) {
+                        sb.append("Pedido ").append(count++).append(":\n").append(p.getResumo()).append("\n");
+                    }
+                    JOptionPane.showMessageDialog(null, sb.toString(), "Pedidos", JOptionPane.INFORMATION_MESSAGE);
+                }
+
+            } else if (opcao == 7) {
+                if (clientes.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Nenhum cliente para excluir.");
+                    continue;
+                }
+                String[] nomesClientes = clientes.stream().map(c -> c.nome).toArray(String[]::new);
+                int idx = JOptionPane.showOptionDialog(null, "Excluir qual cliente?", "Excluir Cliente",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, nomesClientes, nomesClientes[0]);
+                clientes.remove(idx);
+                JOptionPane.showMessageDialog(null, "Cliente removido.");
+
+            } else if (opcao == 8) {
+                if (pacotes.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Nenhum pacote para excluir.");
+                    continue;
+                }
+                String[] nomesPacotes = pacotes.stream().map(p -> p.nome).toArray(String[]::new);
+                int idx = JOptionPane.showOptionDialog(null, "Excluir qual pacote?", "Excluir Pacote",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, nomesPacotes, nomesPacotes[0]);
+                boolean estaEmPedido = pedidos.stream().anyMatch(p -> p.getPacotes().contains(pacotes.get(idx)));
+                if (estaEmPedido) {
+                    JOptionPane.showMessageDialog(null, "Este pacote está associado a um pedido e não pode ser removido.");
+                } else {
+                    pacotes.remove(idx);
+                    JOptionPane.showMessageDialog(null, "Pacote removido.");
+                }
+
+            } else if (opcao == 9 || opcao == JOptionPane.CLOSED_OPTION) {
                 break;
             }
         }
