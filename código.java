@@ -112,9 +112,13 @@ class Pedido {
     public List<ServicoAdicional> getServicos() {
         return servicos;
     }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
 }
 
-// Classe principal com função main
+// Classe principal com interface gráfica
 public class AgenciaViagens {
     public static void main(String[] args) {
         List<Cliente> clientes = new ArrayList<>();
@@ -131,12 +135,15 @@ public class AgenciaViagens {
                 String nome = JOptionPane.showInputDialog("Nome:");
                 String tel = JOptionPane.showInputDialog("Telefone:");
                 String email = JOptionPane.showInputDialog("Email:");
-                String tipo = JOptionPane.showInputDialog("Tipo (nacional/estrangeiro):");
 
-                if (tipo.equalsIgnoreCase("nacional")) {
+                String[] tiposCliente = {"Nacional", "Estrangeiro"};
+                int tipoCliente = JOptionPane.showOptionDialog(null, "Selecione o tipo de cliente:", "Tipo de Cliente",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, tiposCliente, tiposCliente[0]);
+
+                if (tipoCliente == 0) { // Nacional
                     String cpf = JOptionPane.showInputDialog("CPF:");
                     clientes.add(new ClienteNacional(nome, tel, email, cpf));
-                } else {
+                } else if (tipoCliente == 1) { // Estrangeiro
                     String pass = JOptionPane.showInputDialog("Passaporte:");
                     clientes.add(new ClienteEstrangeiro(nome, tel, email, pass));
                 }
@@ -157,6 +164,7 @@ public class AgenciaViagens {
                     JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.", "Erro!", JOptionPane.ERROR_MESSAGE);
                     continue;
                 }
+
                 String[] nomesClientes = clientes.stream().map(c -> c.nome).toArray(String[]::new);
                 int idxCliente = JOptionPane.showOptionDialog(null, "Escolha o cliente:", "Clientes",
                         JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, nomesClientes, nomesClientes[0]);
@@ -183,7 +191,6 @@ public class AgenciaViagens {
 
                 pedidos.add(pedido);
                 JOptionPane.showMessageDialog(null, "Pedido criado com sucesso!");
-
             } else if (opcao == 4 || opcao == JOptionPane.CLOSED_OPTION) {
                 break;
             }
