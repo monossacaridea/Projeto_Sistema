@@ -8,4 +8,3 @@ características. Além disso, deve possibilitar o relacionamento entre clientes
 pacotes de viagem, permitindo que um cliente contrate mais de um pacote.
 Outro aspecto controlado pelo sistema é a possibilidade de inclusão de serviços
 adicionais: translado, passeios, aluguel de veículos, etc...
- oi
