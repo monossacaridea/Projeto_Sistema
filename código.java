@@ -1,6 +1,11 @@
+// Pacote e imports
 package Agencia;
-import java.util.*;
+
 import javax.swing.*;
+import java.util.List;
+import java.awt.Dimension;
+import java.util.ArrayList;
+
 
 // Cliente abstrato
 abstract class Cliente {
@@ -88,7 +93,6 @@ class PacoteCultural extends PacoteViagem {
     }
 }
 
-// Serviço adicional
 class ServicoAdicional {
     String descricao;
     double preco;
@@ -103,7 +107,6 @@ class ServicoAdicional {
     }
 }
 
-// Pedido
 class Pedido {
     private Cliente cliente;
     private List<PacoteViagem> pacotes = new ArrayList<>();
@@ -124,7 +127,7 @@ class Pedido {
     public String getResumo() {
         StringBuilder sb = new StringBuilder("Cliente: " + cliente.getResumo() + "\nPacotes:\n");
         for (PacoteViagem p : pacotes) sb.append(" - ").append(p.getResumo()).append("\n");
-        if (servicos.size() > 0) {
+        if (!servicos.isEmpty()) {
             sb.append("Serviços adicionais:\n");
             for (ServicoAdicional s : servicos) sb.append(" - ").append(s.getResumo()).append("\n");
         }
@@ -140,7 +143,6 @@ class Pedido {
     }
 }
 
-// Classe principal
 public class AgenciaViagens {
     public static void main(String[] args) {
         List<Cliente> clientes = new ArrayList<>();
@@ -154,15 +156,16 @@ public class AgenciaViagens {
                 "Criar Pedido", "Visualizar Clientes", "Visualizar Pacotes",
                 "Visualizar Pedidos", "Excluir Cliente", "Excluir Pacote", "Sair"
             };
-            int opcao = JOptionPane.showOptionDialog(null, "Escolha uma opção:", "Agência de Viagens",
-                    JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opcoes, opcoes[0]);
+
+            int opcao = JOptionPane.showOptionDialog(null, "Escolha uma opção:", "🧭 Agência de Viagens",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opcoes, opcoes[0]);
 
             if (opcao == 0) {
                 String nome = JOptionPane.showInputDialog("Nome:");
                 String tel = JOptionPane.showInputDialog("Telefone:");
                 String email = JOptionPane.showInputDialog("Email:");
                 String[] tiposCliente = {"Nacional", "Estrangeiro"};
-                int tipoCliente = JOptionPane.showOptionDialog(null, "Tipo de cliente:", "Cliente",
+                int tipoCliente = JOptionPane.showOptionDialog(null, "Tipo de cliente:", "Cadastro de Cliente",
                         JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, tiposCliente, tiposCliente[0]);
                 if (tipoCliente == 0) {
                     String cpf = JOptionPane.showInputDialog("CPF:");
@@ -178,7 +181,7 @@ public class AgenciaViagens {
                 int duracao = Integer.parseInt(JOptionPane.showInputDialog("Duração (dias):"));
                 double preco = Double.parseDouble(JOptionPane.showInputDialog("Preço:"));
                 String[] tiposPacote = {"Aventura", "Luxo", "Cultural"};
-                int tipo = JOptionPane.showOptionDialog(null, "Tipo de Pacote:", "Pacote",
+                int tipo = JOptionPane.showOptionDialog(null, "Tipo de Pacote:", "Cadastro de Pacote",
                         JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, tiposPacote, tiposPacote[0]);
                 switch (tipo) {
                     case 0 -> pacotes.add(new PacoteAventura(nomePacote, destino, duracao, preco));
@@ -219,8 +222,8 @@ public class AgenciaViagens {
                     pedido.adicionarServico(servicos.get(idxServico));
                 }
 
+                JOptionPane.showMessageDialog(null, new JScrollPane(new JTextArea(pedido.getResumo(), 10, 40)), "🧾 Pedido Criado", JOptionPane.INFORMATION_MESSAGE);
                 pedidos.add(pedido);
-                JOptionPane.showMessageDialog(null, "Pedido criado com sucesso!\n\n" + pedido.getResumo());
 
             } else if (opcao == 4) {
                 if (clientes.isEmpty()) {
@@ -228,7 +231,7 @@ public class AgenciaViagens {
                 } else {
                     StringBuilder sb = new StringBuilder();
                     for (Cliente c : clientes) sb.append("- ").append(c.getResumo()).append("\n");
-                    JOptionPane.showMessageDialog(null, sb.toString(), "Clientes", JOptionPane.INFORMATION_MESSAGE);
+                    mostrarTexto("📋 Lista de Clientes", sb.toString());
                 }
 
             } else if (opcao == 5) {
@@ -237,7 +240,7 @@ public class AgenciaViagens {
                 } else {
                     StringBuilder sb = new StringBuilder();
                     for (PacoteViagem p : pacotes) sb.append("- ").append(p.getResumo()).append("\n");
-                    JOptionPane.showMessageDialog(null, sb.toString(), "Pacotes", JOptionPane.INFORMATION_MESSAGE);
+                    mostrarTexto("🧳 Lista de Pacotes", sb.toString());
                 }
 
             } else if (opcao == 6) {
@@ -249,7 +252,7 @@ public class AgenciaViagens {
                     for (Pedido p : pedidos) {
                         sb.append("Pedido ").append(count++).append(":\n").append(p.getResumo()).append("\n");
                     }
-                    JOptionPane.showMessageDialog(null, sb.toString(), "Pedidos", JOptionPane.INFORMATION_MESSAGE);
+                    mostrarTexto("📦 Lista de Pedidos", sb.toString());
                 }
 
             } else if (opcao == 7) {
@@ -283,5 +286,15 @@ public class AgenciaViagens {
                 break;
             }
         }
+    }
+
+    private static void mostrarTexto(String titulo, String texto) {
+        JTextArea textArea = new JTextArea(texto);
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(450, 250));
+        JOptionPane.showMessageDialog(null, scrollPane, titulo, JOptionPane.INFORMATION_MESSAGE);
     }
 }
