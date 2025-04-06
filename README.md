@@ -9,10 +9,15 @@ pacotes de viagem, permitindo que um cliente contrate mais de um pacote.
 Outro aspecto controlado pelo sistema é a possibilidade de inclusão de serviços
 adicionais: translado, passeios, aluguel de veículos, etc...
 
-Curso: Ciência da Computação\n
-Professor: Felippe Pires Ferreira\n
-Disciplina: Linguagem e Técnicas de Programação II\n
+Curso: Ciência da Computação
+
+Professor: Felippe Pires Ferreira
+
+Disciplina: Linguagem e Técnicas de Programação II
+
 
 Alunas:
+
 Beatriz Lisbôa de Freitas - RA: 24401492
+
 Gabriela Pedersoli Caldana - RA: 22404253
