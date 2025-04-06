@@ -298,3 +298,6 @@ public class AgenciaViagens {
         JOptionPane.showMessageDialog(null, scrollPane, titulo, JOptionPane.INFORMATION_MESSAGE);
     }
 }
+
+//arrumar a interface principal
+//adicionar um botao de encerrar em criar pacoote  
