@@ -154,7 +154,7 @@ public class AgenciaViagens {
                 servicos.add(new ServicoAdicional(descricao, preco));
             } else if (opcao == 3) { // Criar Pedido
                 if (clientes.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.");
+                    JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.", "Erro!", JOptionPane.ERROR_MESSAGE);
                     continue;
                 }
                 String[] nomesClientes = clientes.stream().map(c -> c.nome).toArray(String[]::new);
