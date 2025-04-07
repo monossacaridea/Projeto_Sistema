@@ -2,6 +2,7 @@
 package Agencia;
 import java.util.*;
 import java.util.List;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -23,33 +24,28 @@ abstract class Cliente {
     }
 }
 
-// Cliente Nacional
 class ClienteNacional extends Cliente {
     private String cpf;
     public ClienteNacional(String nome, String telefone, String email, String cpf) {
         super(nome, telefone, email);
         this.cpf = cpf;
     }
-    @Override
     public String getIdentificacao() {
         return cpf;
     }
 }
 
-// Cliente Estrangeiro
 class ClienteEstrangeiro extends Cliente {
     private String passaporte;
     public ClienteEstrangeiro(String nome, String telefone, String email, String passaporte) {
         super(nome, telefone, email);
         this.passaporte = passaporte;
     }
-    @Override
     public String getIdentificacao() {
         return passaporte;
     }
 }
 
-// Pacote abstrato
 abstract class PacoteViagem {
     protected String nome;
     protected String destino;
@@ -58,9 +54,6 @@ abstract class PacoteViagem {
     protected String tipo;
 
     public PacoteViagem(String nome, String destino, int duracao, double preco, String tipo) {
-        if (destino.isEmpty() || preco <= 0) {
-            throw new IllegalArgumentException("Destino e preço são obrigatórios.");
-        }
         this.nome = nome;
         this.destino = destino;
         this.duracao = duracao;
@@ -155,144 +148,176 @@ public class AgenciaViagens {
                 "Visualizar Pedidos", "Excluir Cliente", "Excluir Pacote", "Sair"
             };
 
-            int opcao = JOptionPane.showOptionDialog(null, "Escolha uma opção:", "🧭 Agência de Viagens",
+            int opcao = JOptionPane.showOptionDialog(null, "Escolha uma opção:", "🗺️ Agência de Viagens",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opcoes, opcoes[0]);
 
-            if (opcao == 0) {
-                String nome = JOptionPane.showInputDialog("Nome:");
-                String tel = JOptionPane.showInputDialog("Telefone:");
-                String email = JOptionPane.showInputDialog("Email:");
-                String[] tiposCliente = {"Nacional", "Estrangeiro"};
-                int tipoCliente = JOptionPane.showOptionDialog(null, "Tipo de cliente:", "Cadastro de Cliente",
-                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, tiposCliente, tiposCliente[0]);
-                if (tipoCliente == 0) {
-                    String cpf = JOptionPane.showInputDialog("CPF:");
-                    clientes.add(new ClienteNacional(nome, tel, email, cpf));
-                } else {
-                    String pass = JOptionPane.showInputDialog("Passaporte:");
-                    clientes.add(new ClienteEstrangeiro(nome, tel, email, pass));
-                }
+            if (opcao == 0) cadastrarCliente(clientes);
+            else if (opcao == 1) cadastrarPacote(pacotes);
+            else if (opcao == 2) cadastrarServico(servicos);
+            else if (opcao == 3) criarPedido(clientes, pacotes, servicos, pedidos);
+            else if (opcao == 4) listar(clientes.stream().map(Cliente::getResumo).toList(), "📋 Lista de Clientes");
+            else if (opcao == 5) listar(pacotes.stream().map(PacoteViagem::getResumo).toList(), "🛳️ Lista de Pacotes");
+            else if (opcao == 6) listar(pedidos.stream().map(Pedido::getResumo).toList(), "📦 Lista de Pedidos");
+            else if (opcao == 7) excluirItem(clientes, "cliente");
+            else if (opcao == 8) excluirPacote(pacotes, pedidos);
+            else break;
+        }
+    }
 
-            } else if (opcao == 1) {
-                String nomePacote = JOptionPane.showInputDialog("Nome do Pacote:");
-                String destino = JOptionPane.showInputDialog("Destino:");
-                int duracao = Integer.parseInt(JOptionPane.showInputDialog("Duração (dias):"));
-                double preco = Double.parseDouble(JOptionPane.showInputDialog("Preço:"));
-                String[] tiposPacote = {"Aventura", "Luxo", "Cultural"};
-                int tipo = JOptionPane.showOptionDialog(null, "Tipo de Pacote:", "Cadastro de Pacote",
-                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, tiposPacote, tiposPacote[0]);
-                switch (tipo) {
-                    case 0 -> pacotes.add(new PacoteAventura(nomePacote, destino, duracao, preco));
-                    case 1 -> pacotes.add(new PacoteLuxo(nomePacote, destino, duracao, preco));
-                    case 2 -> pacotes.add(new PacoteCultural(nomePacote, destino, duracao, preco));
-                }
+    private static void cadastrarCliente(List<Cliente> clientes) {
+        JPanel panel = new JPanel(new GridLayout(4, 2));
+        JTextField nomeField = new JTextField();
+        JTextField telField = new JTextField();
+        JTextField emailField = new JTextField();
+        panel.add(new JLabel("Nome:")); panel.add(nomeField);
+        panel.add(new JLabel("Telefone:")); panel.add(telField);
+        panel.add(new JLabel("Email:")); panel.add(emailField);
 
-            } else if (opcao == 2) {
-                String descricao = JOptionPane.showInputDialog("Descrição do Serviço:");
-                double preco = Double.parseDouble(JOptionPane.showInputDialog("Preço:"));
-                servicos.add(new ServicoAdicional(descricao, preco));
+        String[] tipos = {"Nacional", "Estrangeiro"};
+        JComboBox<String> tipoBox = new JComboBox<>(tipos);
+        panel.add(new JLabel("Tipo:")); panel.add(tipoBox);
 
-            } else if (opcao == 3) {
-                if (clientes.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.", "Atenção!", JOptionPane.WARNING_MESSAGE);
-                    continue;
-                }
-                String[] nomesClientes = clientes.stream().map(c -> c.nome).toArray(String[]::new);
-                int idxCliente = JOptionPane.showOptionDialog(null, "Escolha o cliente:", "Clientes",
-                        JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, nomesClientes, nomesClientes[0]);
-                Pedido pedido = new Pedido(clientes.get(idxCliente));
+        int result = JOptionPane.showConfirmDialog(null, panel, "Cadastro de Cliente",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            String nome = nomeField.getText();
+            String tel = telField.getText();
+            String email = emailField.getText();
+            String tipo = (String) tipoBox.getSelectedItem();
+            String id = JOptionPane.showInputDialog(tipo.equals("Nacional") ? "CPF:" : "Passaporte:");
+            Cliente novo = tipo.equals("Nacional") ? new ClienteNacional(nome, tel, email, id)
+                                                    : new ClienteEstrangeiro(nome, tel, email, id);
+            clientes.add(novo);
+        }
+    }
 
-                while (true) {
-                    String[] nomesPacotes = pacotes.stream().map(p -> p.nome).toArray(String[]::new);
-                    if (nomesPacotes.length == 0) break;
-                    int idxPacote = JOptionPane.showOptionDialog(null, "Adicionar Pacote (Cancelar para encerrar):", "Pacotes",
-                            JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, nomesPacotes, nomesPacotes[0]);
-                    if (idxPacote == -1) break;
-                    pedido.adicionarPacote(pacotes.get(idxPacote));
-                }
+    private static void cadastrarPacote(List<PacoteViagem> pacotes) {
+        JPanel panel = new JPanel(new GridLayout(4, 2));
+        JTextField nomeField = new JTextField();
+        JTextField destinoField = new JTextField();
+        JTextField duracaoField = new JTextField();
+        JTextField precoField = new JTextField();
+        panel.add(new JLabel("Nome:")); panel.add(nomeField);
+        panel.add(new JLabel("Destino:")); panel.add(destinoField);
+        panel.add(new JLabel("Duração (dias):")); panel.add(duracaoField);
+        panel.add(new JLabel("Preço:")); panel.add(precoField);
 
-                while (true) {
-                    String[] nomesServicos = servicos.stream().map(s -> s.descricao).toArray(String[]::new);
-                    if (nomesServicos.length == 0) break;
-                    int idxServico = JOptionPane.showOptionDialog(null, "Adicionar Serviço (Cancelar para encerrar):", "Serviços",
-                            JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, nomesServicos, nomesServicos[0]);
-                    if (idxServico == -1) break;
-                    pedido.adicionarServico(servicos.get(idxServico));
-                }
+        String[] tipos = {"Aventura", "Luxo", "Cultural"};
+        int result = JOptionPane.showConfirmDialog(null, panel, "Cadastro de Pacote",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
-                JOptionPane.showMessageDialog(null, new JScrollPane(new JTextArea(pedido.getResumo(), 10, 40)), "🧾 Pedido Criado", JOptionPane.INFORMATION_MESSAGE);
-                pedidos.add(pedido);
-
-            } else if (opcao == 4) {
-                if (clientes.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.", "Atenção!", JOptionPane.WARNING_MESSAGE);
-                } else {
-                    StringBuilder sb = new StringBuilder();
-                    for (Cliente c : clientes) sb.append("- ").append(c.getResumo()).append("\n");
-                    mostrarTexto("📋 Lista de Clientes", sb.toString());
-                }
-
-            } else if (opcao == 5) {
-                if (pacotes.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum pacote cadastrado.", "Atenção!", JOptionPane.WARNING_MESSAGE);
-                } else {
-                    StringBuilder sb = new StringBuilder();
-                    for (PacoteViagem p : pacotes) sb.append("- ").append(p.getResumo()).append("\n");
-                    mostrarTexto("🧳 Lista de Pacotes", sb.toString());
-                }
-
-            } else if (opcao == 6) {
-                if (pedidos.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum pedido criado.", "Atenção!", JOptionPane.WARNING_MESSAGE);
-                } else {
-                    StringBuilder sb = new StringBuilder();
-                    int count = 1;
-                    for (Pedido p : pedidos) {
-                        sb.append("Pedido ").append(count++).append(":\n").append(p.getResumo()).append("\n");
-                    }
-                    mostrarTexto("📦 Lista de Pedidos", sb.toString());
-                }
-
-            } else if (opcao == 7) {
-                if (clientes.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum cliente para excluir.", "Atenção!", JOptionPane.WARNING_MESSAGE);
-                    continue;
-                }
-                String[] nomesClientes = clientes.stream().map(c -> c.nome).toArray(String[]::new);
-                int idx = JOptionPane.showOptionDialog(null, "Excluir qual cliente?", "Excluir Cliente",
-                        JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, nomesClientes, nomesClientes[0]);
-                clientes.remove(idx);
-                JOptionPane.showMessageDialog(null, "Cliente removido.");
-
-            } else if (opcao == 8) {
-                if (pacotes.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum pacote para excluir.", "Atenção!", JOptionPane.WARNING_MESSAGE);
-                    continue;
-                }
-                String[] nomesPacotes = pacotes.stream().map(p -> p.nome).toArray(String[]::new);
-                int idx = JOptionPane.showOptionDialog(null, "Excluir qual pacote?", "Excluir Pacote",
-                        JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, nomesPacotes, nomesPacotes[0]);
-                boolean estaEmPedido = pedidos.stream().anyMatch(p -> p.getPacotes().contains(pacotes.get(idx)));
-                if (estaEmPedido) {
-                    JOptionPane.showMessageDialog(null, "Este pacote está associado a um pedido e não pode ser removido.", "Atenção!", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    pacotes.remove(idx);
-                    JOptionPane.showMessageDialog(null, "Pacote removido.");
-                }
-
-            } else if (opcao == 9 || opcao == JOptionPane.CLOSED_OPTION) {
-                break;
+        if (result == JOptionPane.OK_OPTION) {
+            String nome = nomeField.getText();
+            String destino = destinoField.getText();
+            int duracao = Integer.parseInt(duracaoField.getText());
+            double preco = Double.parseDouble(precoField.getText());
+            String tipo = (String) JOptionPane.showInputDialog(null, "Tipo de Pacote:", "Tipo",
+                    JOptionPane.QUESTION_MESSAGE, null, tipos, tipos[0]);
+            switch (tipo) {
+                case "Aventura" -> pacotes.add(new PacoteAventura(nome, destino, duracao, preco));
+                case "Luxo" -> pacotes.add(new PacoteLuxo(nome, destino, duracao, preco));
+                case "Cultural" -> pacotes.add(new PacoteCultural(nome, destino, duracao, preco));
             }
         }
     }
 
-    private static void mostrarTexto(String titulo, String texto) {
-        JTextArea textArea = new JTextArea(texto);
-        textArea.setEditable(false);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(new Dimension(450, 250));
-        JOptionPane.showMessageDialog(null, scrollPane, titulo, JOptionPane.INFORMATION_MESSAGE);
+    private static void cadastrarServico(List<ServicoAdicional> servicos) {
+        JTextField descField = new JTextField();
+        JTextField precoField = new JTextField();
+        JPanel panel = new JPanel(new GridLayout(2, 2));
+        panel.add(new JLabel("Descrição:")); panel.add(descField);
+        panel.add(new JLabel("Preço:")); panel.add(precoField);
+        int result = JOptionPane.showConfirmDialog(null, panel, "Cadastro de Serviço",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            servicos.add(new ServicoAdicional(descField.getText(), Double.parseDouble(precoField.getText())));
+        }
+    }
+
+    private static void criarPedido(List<Cliente> clientes, List<PacoteViagem> pacotes, List<ServicoAdicional> servicos, List<Pedido> pedidos) {
+        if (clientes.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.", null, JOptionPane.WARNING_MESSAGE); return;
+        }
+
+        JList<String> listaClientes = new JList<>(clientes.stream().map(c -> c.nome).toArray(String[]::new));
+        listaClientes.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollClientes = new JScrollPane(listaClientes);
+        scrollClientes.setPreferredSize(new Dimension(250, 100));
+        int cliRes = JOptionPane.showConfirmDialog(null, scrollClientes, "Escolha o Cliente",
+                JOptionPane.OK_CANCEL_OPTION);
+        if (cliRes != JOptionPane.OK_OPTION) return;
+        Pedido pedido = new Pedido(clientes.get(listaClientes.getSelectedIndex()));
+
+        if (!pacotes.isEmpty()) {
+            JList<String> listaPacotes = new JList<>(pacotes.stream().map(p -> p.nome).toArray(String[]::new));
+            listaPacotes.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+            JScrollPane scrollPacotes = new JScrollPane(listaPacotes);
+            scrollPacotes.setPreferredSize(new Dimension(250, 150));
+            int pacRes = JOptionPane.showConfirmDialog(null, scrollPacotes, "Escolha os Pacotes",
+                    JOptionPane.OK_CANCEL_OPTION);
+            if (pacRes == JOptionPane.OK_OPTION) {
+                for (int i : listaPacotes.getSelectedIndices()) pedido.adicionarPacote(pacotes.get(i));
+            }
+        }
+
+        if (!servicos.isEmpty()) {
+            JList<String> listaServicos = new JList<>(servicos.stream().map(s -> s.descricao).toArray(String[]::new));
+            listaServicos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+            JScrollPane scrollServ = new JScrollPane(listaServicos);
+            scrollServ.setPreferredSize(new Dimension(250, 150));
+            int servRes = JOptionPane.showConfirmDialog(null, scrollServ, "Escolha os Serviços",
+                    JOptionPane.OK_CANCEL_OPTION);
+            if (servRes == JOptionPane.OK_OPTION) {
+                for (int i : listaServicos.getSelectedIndices()) pedido.adicionarServico(servicos.get(i));
+            }
+        }
+
+        JOptionPane.showMessageDialog(null, new JScrollPane(new JTextArea(pedido.getResumo(), 10, 40)),
+                "📜 Pedido Criado", JOptionPane.INFORMATION_MESSAGE);
+        pedidos.add(pedido);
+    }
+
+    private static void listar(List<String> itens, String titulo) {
+        if (itens.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nada cadastrado.", null, JOptionPane.WARNING_MESSAGE);
+        } else {
+            JTextArea area = new JTextArea(String.join("\n", itens));
+            area.setEditable(false);
+            JScrollPane scroll = new JScrollPane(area);
+            scroll.setPreferredSize(new Dimension(450, 250));
+            JOptionPane.showMessageDialog(null, scroll, titulo, JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private static void excluirItem(List<?> lista, String tipo) {
+        if (lista.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nenhum " + tipo + " para excluir.", null, JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        String[] nomes = lista.stream().map(o -> o.toString()).toArray(String[]::new);
+        int idx = JOptionPane.showOptionDialog(null, "Excluir qual " + tipo + "?", "Excluir",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, nomes, nomes[0]);
+        if (idx >= 0) {
+            lista.remove(idx);
+            JOptionPane.showMessageDialog(null, tipo.substring(0, 1).toUpperCase() + tipo.substring(1) + " removido.");
+        }
+    }
+
+    private static void excluirPacote(List<PacoteViagem> pacotes, List<Pedido> pedidos) {
+        if (pacotes.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nenhum pacote para excluir.", null, JOptionPane.WARNING_MESSAGE); return;
+        }
+        String[] nomes = pacotes.stream().map(p -> p.nome).toArray(String[]::new);
+        int idx = JOptionPane.showOptionDialog(null, "Excluir qual pacote?", "Excluir Pacote",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, nomes, nomes[0]);
+        if (idx >= 0) {
+            boolean emPedido = pedidos.stream().anyMatch(p -> p.getPacotes().contains(pacotes.get(idx)));
+            if (emPedido) {
+                JOptionPane.showMessageDialog(null, "Este pacote está em um pedido e não pode ser excluído.", "Atenção", JOptionPane.ERROR_MESSAGE);
+            } else {
+                pacotes.remove(idx);
+                JOptionPane.showMessageDialog(null, "Pacote removido.");
+            }
+        }
     }
 }
