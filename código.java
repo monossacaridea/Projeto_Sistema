@@ -1,11 +1,9 @@
 // Pacote e imports
 package Agencia;
-
-import javax.swing.*;
+import java.util.*;
 import java.util.List;
-import java.awt.Dimension;
-import java.util.ArrayList;
-
+import javax.swing.*;
+import java.awt.*;
 
 // Cliente abstrato
 abstract class Cliente {
@@ -196,7 +194,7 @@ public class AgenciaViagens {
 
             } else if (opcao == 3) {
                 if (clientes.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.");
+                    JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.", "Atenção!", JOptionPane.WARNING_MESSAGE);
                     continue;
                 }
                 String[] nomesClientes = clientes.stream().map(c -> c.nome).toArray(String[]::new);
@@ -227,7 +225,7 @@ public class AgenciaViagens {
 
             } else if (opcao == 4) {
                 if (clientes.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.");
+                    JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.", "Atenção!", JOptionPane.WARNING_MESSAGE);
                 } else {
                     StringBuilder sb = new StringBuilder();
                     for (Cliente c : clientes) sb.append("- ").append(c.getResumo()).append("\n");
@@ -236,7 +234,7 @@ public class AgenciaViagens {
 
             } else if (opcao == 5) {
                 if (pacotes.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum pacote cadastrado.");
+                    JOptionPane.showMessageDialog(null, "Nenhum pacote cadastrado.", "Atenção!", JOptionPane.WARNING_MESSAGE);
                 } else {
                     StringBuilder sb = new StringBuilder();
                     for (PacoteViagem p : pacotes) sb.append("- ").append(p.getResumo()).append("\n");
@@ -245,7 +243,7 @@ public class AgenciaViagens {
 
             } else if (opcao == 6) {
                 if (pedidos.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum pedido criado.");
+                    JOptionPane.showMessageDialog(null, "Nenhum pedido criado.", "Atenção!", JOptionPane.WARNING_MESSAGE);
                 } else {
                     StringBuilder sb = new StringBuilder();
                     int count = 1;
@@ -257,7 +255,7 @@ public class AgenciaViagens {
 
             } else if (opcao == 7) {
                 if (clientes.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum cliente para excluir.");
+                    JOptionPane.showMessageDialog(null, "Nenhum cliente para excluir.", "Atenção!", JOptionPane.WARNING_MESSAGE);
                     continue;
                 }
                 String[] nomesClientes = clientes.stream().map(c -> c.nome).toArray(String[]::new);
@@ -268,7 +266,7 @@ public class AgenciaViagens {
 
             } else if (opcao == 8) {
                 if (pacotes.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Nenhum pacote para excluir.");
+                    JOptionPane.showMessageDialog(null, "Nenhum pacote para excluir.", "Atenção!", JOptionPane.WARNING_MESSAGE);
                     continue;
                 }
                 String[] nomesPacotes = pacotes.stream().map(p -> p.nome).toArray(String[]::new);
@@ -276,7 +274,7 @@ public class AgenciaViagens {
                         JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, nomesPacotes, nomesPacotes[0]);
                 boolean estaEmPedido = pedidos.stream().anyMatch(p -> p.getPacotes().contains(pacotes.get(idx)));
                 if (estaEmPedido) {
-                    JOptionPane.showMessageDialog(null, "Este pacote está associado a um pedido e não pode ser removido.");
+                    JOptionPane.showMessageDialog(null, "Este pacote está associado a um pedido e não pode ser removido.", "Atenção!", JOptionPane.ERROR_MESSAGE);
                 } else {
                     pacotes.remove(idx);
                     JOptionPane.showMessageDialog(null, "Pacote removido.");
@@ -298,6 +296,3 @@ public class AgenciaViagens {
         JOptionPane.showMessageDialog(null, scrollPane, titulo, JOptionPane.INFORMATION_MESSAGE);
     }
 }
-
-//arrumar a interface principal
-//adicionar um botao de encerrar em criar pacoote  
