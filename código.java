@@ -22,6 +22,10 @@ abstract class Cliente {
     public String getResumo() {
         return nome + " (" + getIdentificacao() + ")";
     }
+
+    public String toString() {
+        return getResumo();
+    }
 }
 
 class ClienteNacional extends Cliente {
@@ -68,6 +72,14 @@ abstract class PacoteViagem {
     public String getResumo() {
         return nome + " - " + tipo + " (" + destino + ", " + duracao + " dias, R$" + preco + ")";
     }
+
+    public String toString() {
+        return getResumo();
+    }
+
+    public double getPreco() {
+        return preco;
+    }
 }
 
 class PacoteAventura extends PacoteViagem {
@@ -100,6 +112,14 @@ class ServicoAdicional {
     public String getResumo() {
         return descricao + " (R$" + preco + ")";
     }
+
+    public String toString() {
+        return getResumo();
+    }
+
+    public double getPreco() {
+        return preco;
+    }
 }
 
 class Pedido {
@@ -126,15 +146,19 @@ class Pedido {
             sb.append("Serviços adicionais:\n");
             for (ServicoAdicional s : servicos) sb.append(" - ").append(s.getResumo()).append("\n");
         }
+        sb.append("Total: R$").append(String.format("%.2f", calcularTotal()));
         return sb.toString();
     }
 
-    public Cliente getCliente() {
-        return cliente;
+    public double calcularTotal() {
+        double total = 0;
+        for (PacoteViagem p : pacotes) total += p.getPreco();
+        for (ServicoAdicional s : servicos) total += s.getPreco();
+        return total;
     }
 
-    public List<PacoteViagem> getPacotes() {
-        return pacotes;
+    public String toString() {
+        return getResumo();
     }
 }
 
@@ -147,14 +171,14 @@ public class AgenciaViagens {
 
         while (true) {
             String[] opcoes = {"Clientes", "Pacotes", "Serviços", "Pedidos", "Sair"};
-            int opcao = JOptionPane.showOptionDialog(null, "Escolha uma opção:", "\uD83C\uDF0E Agência de Viagens",
+            int opcao = JOptionPane.showOptionDialog(null, "Escolha uma opção:", "🌍 Agência de Viagens",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opcoes, opcoes[0]);
 
             if (opcao == 0) menuClientes(clientes);
             else if (opcao == 1) menuPacotes(pacotes);
             else if (opcao == 2) cadastrarServico(servicos);
-            else if (opcao == 3) criarPedido(clientes, pacotes, servicos, pedidos);
-            else if (opcao == 4 || opcao == JOptionPane.CLOSED_OPTION) break;
+            else if (opcao == 3) menuPedidos(clientes, pacotes, servicos, pedidos);
+            else break;
         }
     }
 
@@ -182,6 +206,18 @@ public class AgenciaViagens {
         }
     }
 
+    private static void menuPedidos(List<Cliente> clientes, List<PacoteViagem> pacotes,
+                                    List<ServicoAdicional> servicos, List<Pedido> pedidos) {
+        String[] opcoes = {"Criar Pedido", "Visualizar Pedidos", "Voltar"};
+        int escolha = JOptionPane.showOptionDialog(null, "Menu de Pedidos:", "Pedidos",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opcoes, opcoes[0]);
+
+        switch (escolha) {
+            case 0 -> criarPedido(clientes, pacotes, servicos, pedidos);
+            case 1 -> listar(pedidos.stream().map(Pedido::getResumo).toList(), "Pedidos");
+        }
+    }
+
     private static void cadastrarCliente(List<Cliente> clientes) {
         JPanel panel = new JPanel(new GridLayout(4, 2));
         JTextField nomeField = new JTextField();
@@ -205,18 +241,18 @@ public class AgenciaViagens {
             String tipo = (String) tipoBox.getSelectedItem();
 
             if (nome.isEmpty() || tel.isEmpty() || email.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Todos os campos devem ser preenchidos.");
+                JOptionPane.showMessageDialog(null, "Todos os campos são obrigatórios!", "Erro", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             String id = JOptionPane.showInputDialog(tipo.equals("Nacional") ? "CPF:" : "Passaporte:");
             if (id == null || id.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Identificação obrigatória.");
+                JOptionPane.showMessageDialog(null, "Documento obrigatório!", "Erro", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            Cliente novo = tipo.equals("Nacional") ? new ClienteNacional(nome, tel, email, id.trim())
-                                                    : new ClienteEstrangeiro(nome, tel, email, id.trim());
+            Cliente novo = tipo.equals("Nacional") ? new ClienteNacional(nome, tel, email, id)
+                                                   : new ClienteEstrangeiro(nome, tel, email, id);
             clientes.add(novo);
         }
     }
@@ -238,16 +274,12 @@ public class AgenciaViagens {
 
         if (result == JOptionPane.OK_OPTION) {
             try {
-                String nome = nomeField.getText().trim();
-                String destino = destinoField.getText().trim();
-                int duracao = Integer.parseInt(duracaoField.getText().trim());
-                double preco = Double.parseDouble(precoField.getText().trim());
-
+                String nome = nomeField.getText();
+                String destino = destinoField.getText();
+                int duracao = Integer.parseInt(duracaoField.getText());
+                double preco = Double.parseDouble(precoField.getText());
                 String tipo = (String) JOptionPane.showInputDialog(null, "Tipo de Pacote:", "Tipo",
                         JOptionPane.QUESTION_MESSAGE, null, tipos, tipos[0]);
-
-                if (tipo == null) return;
-
                 switch (tipo) {
                     case "Aventura" -> pacotes.add(new PacoteAventura(nome, destino, duracao, preco));
                     case "Luxo" -> pacotes.add(new PacoteLuxo(nome, destino, duracao, preco));
@@ -268,66 +300,62 @@ public class AgenciaViagens {
         int result = JOptionPane.showConfirmDialog(null, panel, "Cadastro de Serviço",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
-            servicos.add(new ServicoAdicional(descField.getText(), Double.parseDouble(precoField.getText())));
+            try {
+                servicos.add(new ServicoAdicional(descField.getText(), Double.parseDouble(precoField.getText())));
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Preço inválido.");
+            }
         }
     }
 
-    private static void criarPedido(List<Cliente> clientes, List<PacoteViagem> pacotes, List<ServicoAdicional> servicos, List<Pedido> pedidos) {
+    private static void criarPedido(List<Cliente> clientes, List<PacoteViagem> pacotes,
+                                    List<ServicoAdicional> servicos, List<Pedido> pedidos) {
         if (clientes.isEmpty() || pacotes.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "É necessário ter pelo menos 1 cliente e 1 pacote para criar um pedido.");
+            JOptionPane.showMessageDialog(null, "Cadastre clientes e pacotes antes.");
             return;
         }
 
-        String[] nomesClientes = clientes.stream().map(Cliente::getResumo).toArray(String[]::new);
-        String escolhido = (String) JOptionPane.showInputDialog(null, "Escolha o cliente:", "Novo Pedido",
-                JOptionPane.PLAIN_MESSAGE, null, nomesClientes, nomesClientes[0]);
+        Cliente cliente = (Cliente) JOptionPane.showInputDialog(null, "Selecione o cliente:", "Cliente",
+                JOptionPane.QUESTION_MESSAGE, null, clientes.toArray(), null);
+        if (cliente == null) return;
 
-        if (escolhido == null) return;
-
-        Cliente cliente = clientes.get(Arrays.asList(nomesClientes).indexOf(escolhido));
         Pedido pedido = new Pedido(cliente);
 
-        String[] pacs = pacotes.stream().map(PacoteViagem::getResumo).toArray(String[]::new);
-        JList<String> listaPacotes = new JList<>(pacs);
+        JList<PacoteViagem> listaPacotes = new JList<>(pacotes.toArray(new PacoteViagem[0]));
         listaPacotes.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         JScrollPane scrollPacotes = new JScrollPane(listaPacotes);
-        scrollPacotes.setPreferredSize(new Dimension(350, 150));
-        int resPacotes = JOptionPane.showConfirmDialog(null, scrollPacotes, "Selecionar Pacotes",
+        scrollPacotes.setPreferredSize(new Dimension(400, 150));
+        int pacoteSel = JOptionPane.showConfirmDialog(null, scrollPacotes, "Selecione Pacotes",
                 JOptionPane.OK_CANCEL_OPTION);
 
-        if (resPacotes == JOptionPane.OK_OPTION) {
-            for (int i : listaPacotes.getSelectedIndices()) {
-                pedido.adicionarPacote(pacotes.get(i));
-            }
+        if (pacoteSel == JOptionPane.OK_OPTION) {
+            for (PacoteViagem p : listaPacotes.getSelectedValuesList()) pedido.adicionarPacote(p);
+        } else return;
 
-            if (!servicos.isEmpty()) {
-                String[] servs = servicos.stream().map(ServicoAdicional::getResumo).toArray(String[]::new);
-                JList<String> listaServs = new JList<>(servs);
-                listaServs.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-                JScrollPane scrollServs = new JScrollPane(listaServs);
-                scrollServs.setPreferredSize(new Dimension(350, 150));
-                int resServs = JOptionPane.showConfirmDialog(null, scrollServs, "Serviços Adicionais",
-                        JOptionPane.OK_CANCEL_OPTION);
-                if (resServs == JOptionPane.OK_OPTION) {
-                    for (int i : listaServs.getSelectedIndices()) {
-                        pedido.adicionarServico(servicos.get(i));
-                    }
-                }
+        if (!servicos.isEmpty()) {
+            JList<ServicoAdicional> listaServicos = new JList<>(servicos.toArray(new ServicoAdicional[0]));
+            listaServicos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+            JScrollPane scrollServicos = new JScrollPane(listaServicos);
+            scrollServicos.setPreferredSize(new Dimension(400, 150));
+            int servSel = JOptionPane.showConfirmDialog(null, scrollServicos, "Selecione Serviços Adicionais",
+                    JOptionPane.OK_CANCEL_OPTION);
+            if (servSel == JOptionPane.OK_OPTION) {
+                for (ServicoAdicional s : listaServicos.getSelectedValuesList()) pedido.adicionarServico(s);
             }
-
-            pedidos.add(pedido);
-            JOptionPane.showMessageDialog(null, "Pedido criado:\n\n" + pedido.getResumo());
         }
+
+        pedidos.add(pedido);
+        JOptionPane.showMessageDialog(null, "Pedido criado:\n" + pedido.getResumo());
     }
 
     private static void listar(List<String> itens, String titulo) {
         if (itens.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Nada cadastrado.", null, JOptionPane.WARNING_MESSAGE);
         } else {
-            JTextArea area = new JTextArea(String.join("\n", itens));
+            JTextArea area = new JTextArea(String.join("\n\n", itens));
             area.setEditable(false);
             JScrollPane scroll = new JScrollPane(area);
-            scroll.setPreferredSize(new Dimension(450, 250));
+            scroll.setPreferredSize(new Dimension(500, 300));
             JOptionPane.showMessageDialog(null, scroll, titulo, JOptionPane.INFORMATION_MESSAGE);
         }
     }
@@ -338,15 +366,7 @@ public class AgenciaViagens {
             return;
         }
 
-        String[] nomes;
-        if (lista.get(0) instanceof Cliente) {
-            nomes = lista.stream().map(o -> ((Cliente) o).getResumo()).toArray(String[]::new);
-        } else if (lista.get(0) instanceof PacoteViagem) {
-            nomes = lista.stream().map(o -> ((PacoteViagem) o).getResumo()).toArray(String[]::new);
-        } else {
-            nomes = lista.stream().map(Object::toString).toArray(String[]::new);
-        }
-
+        String[] nomes = lista.stream().map(Object::toString).toArray(String[]::new);
         int idx = JOptionPane.showOptionDialog(null, "Excluir qual " + tipo + "?", "Excluir",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, nomes, nomes[0]);
 
