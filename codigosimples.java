@@ -196,7 +196,7 @@ public class AgenciaViagens {
     private static void cadastrarCliente(List<Cliente> clientes) {
         String nome = JOptionPane.showInputDialog("Nome:");
         if (nome == null || nome.isBlank()) return;
-        String telefone = JOptionPane.showInputDialog("Telefone (apenas números):");
+        String telefone = JOptionPane.showInputDialog("Telefone:");
         if (telefone == null || !telefone.matches("\\d+")) return;
         String email = JOptionPane.showInputDialog("Email:");
         if (email == null || email.isBlank()) return;
@@ -204,7 +204,7 @@ public class AgenciaViagens {
         int tipo = JOptionPane.showOptionDialog(null, "Tipo de Cliente:", "Tipo",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, tipos, tipos[0]);
         if (tipo == -1) return;
-        String id = JOptionPane.showInputDialog(tipo == 0 ? "CPF (apenas números):" : "Passaporte:");
+        String id = JOptionPane.showInputDialog(tipo == 0 ? "CPF:" : "Passaporte:");
         if (id == null || !id.matches("\\d+")) return;
 
         Cliente novo = tipo == 0 ? new ClienteNacional(nome, telefone, email, id)
