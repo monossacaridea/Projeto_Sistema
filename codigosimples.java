@@ -251,18 +251,63 @@ public class AgenciaViagens {
 
 
     private static void cadastrarPacote(List<PacoteViagem> pacotes) {
-        String nome = JOptionPane.showInputDialog("Nome do pacote:");
-        if (nome == null || nome.isBlank()) return;
-        String destino = JOptionPane.showInputDialog("Destino:");
-        if (destino == null || destino.isBlank()) return;
-        int duracao = Integer.parseInt(JOptionPane.showInputDialog("Duração (dias):"));
-        double preco = Double.parseDouble(JOptionPane.showInputDialog("Preço:"));
-        String[] tipos = {"Aventura", "Luxo", "Cultural"};
-        int tipo = JOptionPane.showOptionDialog(null, "Tipo de Pacote:", "Tipo",
-                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, tipos, tipos[0]);
-        if (tipo == -1) return;
+        String nome;
+        while (true) {
+        	nome = JOptionPane.showInputDialog("Nome do pacote:");
+        	if (nome == null) return;
+        	if (nome.isBlank()) {
+        		JOptionPane.showMessageDialog(null, "O pacote deve ter um nome.", "Pacote", JOptionPane.ERROR_MESSAGE);
+        	} else {
+        		 break;
+        	}
+        }
+        
+        String destino;
+        while (true) {
+        	destino = JOptionPane.showInputDialog("Destino:");
+        	if (destino == null) return;
+        	if (destino.isBlank()) {
+        		JOptionPane.showMessageDialog(null, "O pacote deve conter um destino.", "Pacote", JOptionPane.ERROR_MESSAGE);
+        	} else {
+        		 break;
+        	}
+        }
+        
+        String entradaDuracao;
+        int duracao;
+        while (true) {
+            entradaDuracao = JOptionPane.showInputDialog("Duração (dias):");
+            if (entradaDuracao == null) return;
+            if (entradaDuracao.isBlank()) {
+                JOptionPane.showMessageDialog(null, "O pacote deve conter uma duração.", "Pacote", JOptionPane.ERROR_MESSAGE);
+            } else {
+                try {
+                    duracao = Integer.parseInt(entradaDuracao);
+                    break;
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(null, "Digite um número válido para a duração.", "Pacote", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
 
-        switch (tipo) {
+        String entradaPreco;
+        double preco;
+        while (true) {
+            entradaPreco = JOptionPane.showInputDialog("Preço (R$):");
+            if (entradaPreco == null) return;
+            if (entradaPreco.isBlank()) {
+                JOptionPane.showMessageDialog(null, "O pacote deve conter um preço.", "Pacote", JOptionPane.ERROR_MESSAGE);
+            } else {
+                try {
+                    preco = Double.parseDouble(entradaPreco);
+                    break;
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(null, "Digite um número válido para o preço.", "Pacote", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+
+        switch (tipo) { // erro 
             case 0 -> pacotes.add(new PacoteAventura(nome, destino, duracao, preco));
             case 1 -> pacotes.add(new PacoteLuxo(nome, destino, duracao, preco));
             case 2 -> pacotes.add(new PacoteCultural(nome, destino, duracao, preco));
@@ -272,9 +317,31 @@ public class AgenciaViagens {
     }
 
     private static void cadastrarServico(List<ServicoAdicional> servicos) {
-        String desc = JOptionPane.showInputDialog("Descrição:");
-        if (desc == null || desc.isBlank()) return;
-        double preco = Double.parseDouble(JOptionPane.showInputDialog("Preço:"));
+        String desc;
+        while (true) {
+        	desc = JOptionPane.showInputDialog("Descrição:");
+        	if (desc == null) return;
+        	if (desc.isBlank()) {
+        		JOptionPane.showMessageDialog(null, "O serviço deve conter uma descrição.", "Serviços", JOptionPane.ERROR_MESSAGE);
+        	}
+        }
+        
+        String entradaPreco; // erro 
+        double preco;
+        while (true) {
+            entradaPreco = JOptionPane.showInputDialog("Preço (R$):");
+            if (entradaPreco == null) return;
+            if (entradaPreco.isBlank()) {
+                JOptionPane.showMessageDialog(null, "O serviço deve conter um preço.", "Serviços", JOptionPane.ERROR_MESSAGE);
+            } else {
+                try {
+                    preco = Double.parseDouble(entradaPreco);
+                    break;
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(null, "Digite um número válido para o preço.", "Pacote", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
         servicos.add(new ServicoAdicional(desc, preco));
         JOptionPane.showMessageDialog(null, "Serviço cadastrado com sucesso!");
     }
