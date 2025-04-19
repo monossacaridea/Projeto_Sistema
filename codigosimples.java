@@ -1,4 +1,4 @@
-package agencia;
+package Agencia;
 
 import java.util.*;
 import javax.swing.*;
@@ -195,17 +195,35 @@ public class AgenciaViagens {
 
     private static void cadastrarCliente(List<Cliente> clientes) {
         String nome = JOptionPane.showInputDialog("Nome:");
-        if (nome == null || nome.isBlank()) return;
+        if (nome == null || nome.isBlank()) {
+        	JOptionPane.showMessageDialog(null, "Nome obrigatório.", "Cadastro", JOptionPane.ERROR_MESSAGE);
+        	return;
+        }
+        
         String telefone = JOptionPane.showInputDialog("Telefone:");
-        if (telefone == null || !telefone.matches("\\d+")) return;
+        if (telefone == null) {
+        	JOptionPane.showMessageDialog(null, "Número de telefone obrigatório.", "Cadastro", JOptionPane.ERROR_MESSAGE);
+        	return;
+        } else if (!telefone.matches("\\d+")) {
+        	JOptionPane.showMessageDialog(null, "O número de telefone deve conter apenas números.", "Cadastro", JOptionPane.ERROR_MESSAGE);
+        	return;
+        }
+        
         String email = JOptionPane.showInputDialog("Email:");
-        if (email == null || email.isBlank()) return;
+        if (email == null || email.isBlank()) {
+        	JOptionPane.showMessageDialog(null, "Email obrigatório.", "Cadastro", JOptionPane.ERROR_MESSAGE);
+        	return;
+        }
+        
         String[] tipos = {"Nacional", "Estrangeiro"};
         int tipo = JOptionPane.showOptionDialog(null, "Tipo de Cliente:", "Tipo",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, tipos, tipos[0]);
         if (tipo == -1) return;
         String id = JOptionPane.showInputDialog(tipo == 0 ? "CPF:" : "Passaporte:");
-        if (id == null || !id.matches("\\d+")) return;
+        if (id == null || !id.matches("\\d+")) {
+        	JOptionPane.showMessageDialog(null, "Documento obrigatório.", "Cadastro", JOptionPane.ERROR_MESSAGE);
+        	return;
+        }
 
         Cliente novo = tipo == 0 ? new ClienteNacional(nome, telefone, email, id)
                                  : new ClienteEstrangeiro(nome, telefone, email, id);
