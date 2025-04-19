@@ -194,35 +194,53 @@ public class AgenciaViagens {
     }
 
     private static void cadastrarCliente(List<Cliente> clientes) {
-        String nome = JOptionPane.showInputDialog("Nome:");
-        if (nome == null || nome.isBlank()) {
-        	JOptionPane.showMessageDialog(null, "Nome obrigatório.", "Cadastro", JOptionPane.ERROR_MESSAGE);
-        	return;
+        String nome;
+        while (true) {
+            nome = JOptionPane.showInputDialog("Nome:");
+            if (nome == null) return; 
+            if (nome.isBlank()) {
+                JOptionPane.showMessageDialog(null, "Nome obrigatório.", "Cadastro", JOptionPane.ERROR_MESSAGE);
+            } else {
+                break;
+            }
         }
-        
-        String telefone = JOptionPane.showInputDialog("Telefone:");
-        if (telefone == null) {
-        	JOptionPane.showMessageDialog(null, "Número de telefone obrigatório.", "Cadastro", JOptionPane.ERROR_MESSAGE);
-        	return;
-        } else if (!telefone.matches("\\d+")) {
-        	JOptionPane.showMessageDialog(null, "O número de telefone deve conter apenas números.", "Cadastro", JOptionPane.ERROR_MESSAGE);
-        	return;
+
+        String telefone;
+        while (true) {
+            telefone = JOptionPane.showInputDialog("Telefone:");
+            if (telefone == null) return; 
+            if (!telefone.matches("\\d+")) {
+                JOptionPane.showMessageDialog(null, "O número de telefone deve conter apenas números.", "Cadastro", JOptionPane.ERROR_MESSAGE);
+            } else {
+                break;
+            }
         }
-        
-        String email = JOptionPane.showInputDialog("Email:");
-        if (email == null || email.isBlank()) {
-        	JOptionPane.showMessageDialog(null, "Email obrigatório.", "Cadastro", JOptionPane.ERROR_MESSAGE);
-        	return;
+
+        String email;
+        while (true) {
+            email = JOptionPane.showInputDialog("Email:");
+            if (email == null) return; 
+            if (email.isBlank()) {
+                JOptionPane.showMessageDialog(null, "Email obrigatório.", "Cadastro", JOptionPane.ERROR_MESSAGE);
+            } else {
+                break;
+            }
         }
-        
+
         String[] tipos = {"Nacional", "Estrangeiro"};
         int tipo = JOptionPane.showOptionDialog(null, "Tipo de Cliente:", "Tipo",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, tipos, tipos[0]);
         if (tipo == -1) return;
-        String id = JOptionPane.showInputDialog(tipo == 0 ? "CPF:" : "Passaporte:");
-        if (id == null || !id.matches("\\d+")) {
-        	JOptionPane.showMessageDialog(null, "Documento obrigatório.", "Cadastro", JOptionPane.ERROR_MESSAGE);
-        	return;
+
+        String id;
+        while (true) {
+            id = JOptionPane.showInputDialog(tipo == 0 ? "CPF:" : "Passaporte:");
+            if (id == null) return; 
+            if (!id.matches("\\d+")) {
+                JOptionPane.showMessageDialog(null, "Documento deve conter apenas números.", "Cadastro", JOptionPane.ERROR_MESSAGE);
+            } else {
+                break;
+            }
         }
 
         Cliente novo = tipo == 0 ? new ClienteNacional(nome, telefone, email, id)
@@ -230,6 +248,7 @@ public class AgenciaViagens {
         clientes.add(novo);
         JOptionPane.showMessageDialog(null, "Cliente cadastrado com sucesso!");
     }
+
 
     private static void cadastrarPacote(List<PacoteViagem> pacotes) {
         String nome = JOptionPane.showInputDialog("Nome do pacote:");
