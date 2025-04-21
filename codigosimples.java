@@ -20,6 +20,11 @@ abstract class Cliente {
     public String getResumo() {
         return nome + " (" + getIdentificacao() + ")";
     }
+    
+    @Override
+    public String toString() {
+        return getResumo();
+    }
 }
 
 class ClienteNacional extends Cliente {
@@ -307,6 +312,13 @@ public class AgenciaViagens {
             }
         }
 
+        int tipo = JOptionPane.showOptionDialog(null, "Tipo de Pacote:", "Tipo",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
+                new String[]{"Aventura", "Luxo", "Cultural"}, "Aventura");
+
+        if (tipo == -1) return; // <- isso é necessário!
+
+        
         switch (tipo) { // erro 
             case 0 -> pacotes.add(new PacoteAventura(nome, destino, duracao, preco));
             case 1 -> pacotes.add(new PacoteLuxo(nome, destino, duracao, preco));
@@ -319,14 +331,16 @@ public class AgenciaViagens {
     private static void cadastrarServico(List<ServicoAdicional> servicos) {
         String desc;
         while (true) {
-        	desc = JOptionPane.showInputDialog("Descrição:");
-        	if (desc == null) return;
-        	if (desc.isBlank()) {
-        		JOptionPane.showMessageDialog(null, "O serviço deve conter uma descrição.", "Serviços", JOptionPane.ERROR_MESSAGE);
-        	}
+            desc = JOptionPane.showInputDialog("Descrição:");
+            if (desc == null) return;
+            if (desc.isBlank()) {
+                JOptionPane.showMessageDialog(null, "O serviço deve conter uma descrição.", "Serviços", JOptionPane.ERROR_MESSAGE);
+            } else {
+                break;
+            }
         }
-        
-        String entradaPreco; // erro 
+
+        String entradaPreco;
         double preco;
         while (true) {
             entradaPreco = JOptionPane.showInputDialog("Preço (R$):");
@@ -338,13 +352,15 @@ public class AgenciaViagens {
                     preco = Double.parseDouble(entradaPreco);
                     break;
                 } catch (NumberFormatException e) {
-                    JOptionPane.showMessageDialog(null, "Digite um número válido para o preço.", "Pacote", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Digite um número válido para o preço.", "Serviços", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
+
         servicos.add(new ServicoAdicional(desc, preco));
         JOptionPane.showMessageDialog(null, "Serviço cadastrado com sucesso!");
     }
+
 
     private static void criarPedido(List<Cliente> clientes, List<PacoteViagem> pacotes, List<ServicoAdicional> servicos, List<Pedido> pedidos) {
         if (clientes.isEmpty() || pacotes.isEmpty()) {
