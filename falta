@@ -1,0 +1,5 @@
+Deve ser possível listar, buscar e excluir clientes cadastrados.
+Deve ser possível listar, buscar e excluir pacotes cadastrados.
+Deve ser possível incluir, listar, buscar e excluir serviços. 
+Deve ser possível visualizar os pacotes contratados por um cliente.
+Deve ser possível listar os clientes que contrataram determinado pacote.
