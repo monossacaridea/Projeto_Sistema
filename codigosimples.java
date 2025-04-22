@@ -76,8 +76,21 @@ abstract class PacoteViagem {
         return nome + " - " + tipo + " (" + destino + ", " + duracao + " dias, R$" + preco + ")";
     }
 
+    @Override
     public String toString() {
         return getResumo();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        PacoteViagem that = (PacoteViagem) obj;
+        return duracao == that.duracao &&
+                Double.compare(that.preco, preco) == 0 &&
+                nome.equals(that.nome) &&
+                destino.equals(that.destino) &&
+                tipo.equals(that.tipo);
     }
 }
 
@@ -116,6 +129,7 @@ class ServicoAdicional {
         return descricao + " (R$" + preco + ")";
     }
 
+    @Override
     public String toString() {
         return getResumo();
     }
@@ -155,6 +169,10 @@ class Pedido {
         for (ServicoAdicional s : servicos) total += s.getPreco();
         return total;
     }
+
+    public List<PacoteViagem> getPacotes() {
+        return pacotes;
+    }
 }
 
 public class AgenciaViagens {
@@ -170,7 +188,7 @@ public class AgenciaViagens {
                     JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opcoes, opcoes[0]);
 
             if (opcao == 0) menuClientes(clientes);
-            else if (opcao == 1) menuPacotes(pacotes);
+            else if (opcao == 1) menuPacotes(pacotes, pedidos);
             else if (opcao == 2) cadastrarServico(servicos);
             else if (opcao == 3) criarPedido(clientes, pacotes, servicos, pedidos);
             else if (opcao == 4) mostrarResumoGeral(pedidos);
@@ -185,17 +203,17 @@ public class AgenciaViagens {
 
         if (escolha == 0) cadastrarCliente(clientes);
         else if (escolha == 1) listar(clientes.stream().map(Cliente::getResumo).toList(), "Clientes");
-        else if (escolha == 2) excluirItem(clientes, "cliente");
+        else if (escolha == 2) excluirItem(clientes, "cliente", null);
     }
 
-    private static void menuPacotes(List<PacoteViagem> pacotes) {
+    private static void menuPacotes(List<PacoteViagem> pacotes, List<Pedido> pedidos) {
         String[] opcoes = {"Cadastrar", "Visualizar", "Excluir", "Voltar"};
         int escolha = JOptionPane.showOptionDialog(null, "Menu de Pacotes:", "Pacotes",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opcoes, opcoes[0]);
 
         if (escolha == 0) cadastrarPacote(pacotes);
         else if (escolha == 1) listar(pacotes.stream().map(PacoteViagem::getResumo).toList(), "Pacotes");
-        else if (escolha == 2) excluirItem(pacotes, "pacote");
+        else if (escolha == 2) excluirItem(pacotes, "pacote", pedidos);
     }
 
     private static void cadastrarCliente(List<Cliente> clientes) {
@@ -254,28 +272,27 @@ public class AgenciaViagens {
         JOptionPane.showMessageDialog(null, "Cliente cadastrado com sucesso!");
     }
 
-
     private static void cadastrarPacote(List<PacoteViagem> pacotes) {
         String nome;
         while (true) {
-        	nome = JOptionPane.showInputDialog("Nome do pacote:");
-        	if (nome == null) return;
-        	if (nome.isBlank()) {
-        		JOptionPane.showMessageDialog(null, "O pacote deve ter um nome.", "Pacote", JOptionPane.ERROR_MESSAGE);
-        	} else {
-        		 break;
-        	}
+            nome = JOptionPane.showInputDialog("Nome do pacote:");
+            if (nome == null) return;
+            if (nome.isBlank()) {
+                JOptionPane.showMessageDialog(null, "O pacote deve ter um nome.", "Pacote", JOptionPane.ERROR_MESSAGE);
+            } else {
+                 break;
+            }
         }
         
         String destino;
         while (true) {
-        	destino = JOptionPane.showInputDialog("Destino:");
-        	if (destino == null) return;
-        	if (destino.isBlank()) {
-        		JOptionPane.showMessageDialog(null, "O pacote deve conter um destino.", "Pacote", JOptionPane.ERROR_MESSAGE);
-        	} else {
-        		 break;
-        	}
+            destino = JOptionPane.showInputDialog("Destino:");
+            if (destino == null) return;
+            if (destino.isBlank()) {
+                JOptionPane.showMessageDialog(null, "O pacote deve conter um destino.", "Pacote", JOptionPane.ERROR_MESSAGE);
+            } else {
+                 break;
+            }
         }
         
         String entradaDuracao;
@@ -316,10 +333,9 @@ public class AgenciaViagens {
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
                 new String[]{"Aventura", "Luxo", "Cultural"}, "Aventura");
 
-        if (tipo == -1) return; // <- isso é necessário!
+        if (tipo == -1) return;
 
-        
-        switch (tipo) { // erro 
+        switch (tipo) {
             case 0 -> pacotes.add(new PacoteAventura(nome, destino, duracao, preco));
             case 1 -> pacotes.add(new PacoteLuxo(nome, destino, duracao, preco));
             case 2 -> pacotes.add(new PacoteCultural(nome, destino, duracao, preco));
@@ -360,7 +376,6 @@ public class AgenciaViagens {
         servicos.add(new ServicoAdicional(desc, preco));
         JOptionPane.showMessageDialog(null, "Serviço cadastrado com sucesso!");
     }
-
 
     private static void criarPedido(List<Cliente> clientes, List<PacoteViagem> pacotes, List<ServicoAdicional> servicos, List<Pedido> pedidos) {
         if (clientes.isEmpty() || pacotes.isEmpty()) {
@@ -432,7 +447,7 @@ public class AgenciaViagens {
         JOptionPane.showMessageDialog(null, sb.toString(), titulo, JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private static void excluirItem(List<?> lista, String tipo) {
+    private static void excluirItem(List<?> lista, String tipo, List<Pedido> pedidos) {
         if (lista.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Nenhum " + tipo + " para excluir.", null, JOptionPane.WARNING_MESSAGE);
             return;
@@ -443,6 +458,28 @@ public class AgenciaViagens {
                 JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, nomes, nomes[0]);
 
         if (idx >= 0) {
+            if (tipo.equals("pacote") && pedidos != null) {
+                PacoteViagem pacote = (PacoteViagem) lista.get(idx);
+                boolean pacoteEmUso = false;
+                
+                for (Pedido pedido : pedidos) {
+                    for (PacoteViagem p : pedido.getPacotes()) {
+                        if (p.equals(pacote)) {
+                            pacoteEmUso = true;
+                            break;
+                        }
+                    }
+                    if (pacoteEmUso) break;
+                }
+                
+                if (pacoteEmUso) {
+                    JOptionPane.showMessageDialog(null, 
+                        "Não é possível excluir este pacote pois ele está associado a um ou mais pedidos.", 
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            
             lista.remove(idx);
             JOptionPane.showMessageDialog(null, tipo + " removido.");
         }
