@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS pedidos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cliente_id INT NOT NULL,
     data_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    total DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (cliente_id) REFERENCES clientes(id)
 );
 
@@ -49,7 +48,3 @@ CREATE TABLE IF NOT EXISTS pedido_servicos (
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id),
     FOREIGN KEY (servico_id) REFERENCES servicos(id)
 );
-
-select * from clientes;
-select * from pacotes;
-select * from pedidos;
