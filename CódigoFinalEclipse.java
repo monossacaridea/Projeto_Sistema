@@ -214,6 +214,13 @@ class Pedido {
     public List<ServicoAdicional> getServicos() {
         return servicos;
     }
+    @Override
+    public String toString() {
+        return cliente.getNome() + " - " + 
+               pacotes.size() + " pacote(s), " + 
+               servicos.size() + " serviço(s) - Total: R$" + 
+               String.format("%.2f", getTotal());
+    }
 }
 
 public class AgenciaViagens {
@@ -273,13 +280,14 @@ public class AgenciaViagens {
     }
 
     private static void menuPedidos(List<Cliente> clientes, List<PacoteViagem> pacotes, 
-                                  List<ServicoAdicional> servicos, List<Pedido> pedidos) {
-        String[] opcoes = {"Criar Pedido", "Visualizar Pedidos", "Voltar"};
-        int escolha = JOptionPane.showOptionDialog(null, "Menu de Pedidos:", "Pedidos",
-                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opcoes, opcoes[0]);
+            List<ServicoAdicional> servicos, List<Pedido> pedidos) {
+    		String[] opcoes = {"Criar Pedido", "Visualizar Pedidos", "Excluir Pedido", "Voltar"};
+    		int escolha = JOptionPane.showOptionDialog(null, "Menu de Pedidos:", "Pedidos",
+    				JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opcoes, opcoes[0]);
 
-        if (escolha == 0) criarPedido(clientes, pacotes, servicos, pedidos);
-        else if (escolha == 1) listarPedidos(pedidos);
+    		if (escolha == 0) criarPedido(clientes, pacotes, servicos, pedidos);
+    		else if (escolha == 1) listarPedidos(pedidos);
+    		else if (escolha == 2) excluirItem(pedidos, "pedido", pedidos);
     }
 
     private static void cadastrarCliente(List<Cliente> clientes) {
