@@ -1,4 +1,4 @@
-//esse codigo ta conectado com o banco de dados em uma classe só
+//class conexao
 
 package Agencia;
 
