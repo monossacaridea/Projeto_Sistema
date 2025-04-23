@@ -1,9 +1,10 @@
-package Agencia;
+// Projeto de Java: Sistema para Agência de Viagens
+
+package agencia;
 
 import java.util.*;
 import javax.swing.*;
 
-// Cliente abstrato
 abstract class Cliente {
     protected String nome;
     protected String telefone;
@@ -247,7 +248,7 @@ public class AgenciaViagens {
         else if (escolha == 3) excluirItem(clientes, "cliente", null);
         else if (escolha == 4) mostrarPacotesPorCliente(clientes, pedidos);
     }
-
+    
     private static void menuPacotes(List<PacoteViagem> pacotes, List<Pedido> pedidos) {
         String[] opcoes = {"Cadastrar", "Visualizar", "Buscar", "Excluir", "Clientes por Pacote", "Voltar"};
         int escolha = JOptionPane.showOptionDialog(null, "Menu de Pacotes:", "Pacotes",
@@ -695,7 +696,6 @@ public class AgenciaViagens {
             return;
         }
 
-        // Coletar todos os pacotes únicos dos pedidos
         Set<PacoteViagem> todosPacotes = new HashSet<>();
         for (Pedido p : pedidos) {
             todosPacotes.addAll(p.getPacotes());
