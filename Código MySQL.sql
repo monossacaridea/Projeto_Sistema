@@ -48,3 +48,4 @@ CREATE TABLE IF NOT EXISTS pedido_servicos (
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id),
     FOREIGN KEY (servico_id) REFERENCES servicos(id)
 );
+
