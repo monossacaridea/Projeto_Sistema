@@ -1,3 +1,5 @@
+//esse codigo ta conectado com o banco de dados em uma classe só
+
 package Agencia;
 
 import java.sql.*;
