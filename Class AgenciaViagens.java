@@ -1,4 +1,5 @@
-package projetoSistemaAgencia;
+//Altere a senha do banco de dados na linha 270!
+package Agencia;
 
 import java.util.*;
 import javax.swing.*;
@@ -266,7 +267,7 @@ class Pedido {
 public class AgenciaViagens {
     private static final String URL = "jdbc:mysql://localhost:3306/agencia_viagens";
     private static final String USUARIO = "root";
-    private static final String SENHA = "b1gShO3dev1908!";
+    private static final String SENHA = "sua senha";
     
     private static Connection obterConexao() throws SQLException {
         return DriverManager.getConnection(URL, USUARIO, SENHA);
